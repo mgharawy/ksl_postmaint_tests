@@ -78,7 +78,7 @@ class hpl_gpu(hpl_test):
       valid_prog_environs = ['gpustack_builtin']
       tags= { 'hpl','gpu'}
       sourcesdir= '../src/hpl/gpu'
-      time_limit='30m'
+      time_limit='10m'
 
    
    
@@ -101,35 +101,37 @@ class hpl_gpu(hpl_test):
       def setting_variables(self):
         if  self.variant == 'p100':
            self.num_tasks=4
-           self.executable='srun -u -n ${SLURM_NTASKS} -c ${CPUS} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity +0-15:0-15:18-33:18-33 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3 --dat ./HPL.dat.p100'
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 0,3-7:8-13:20-25:26-31  --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3 --dat ./HPL.dat.p100'
            self.num_cpus_per_task=8
            self.num_gpus_per_node=4
-           self.extra_resources = {'memory': {'size': '240G'},'constraint': {'type': 'p100'}}
+           self.extra_resources = {'memory': {'size': '230G'},'constraint': {'type': 'p100'}}
 
-           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=8','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
+           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=6','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
            self.tags |= {'p100'}
 
         elif self.variant == 'v100_8': 
            self.num_tasks=8
-          # self.executable='--bind-to none --nooversubscribe singularity run --nv $IMAGE hpl.sh --cpu-cores-per-rank ${CPUS} \
-#--cpu-affinity 2-5:6-9:10-13:14-17:24-27:28-31:32-37:38-41 \
-#--gpu-affinity 0:1:2:3:4:5:6:7 --dat  ./HPL.dat.v100.G8N1'
-           self.executable='srun -u -n ${SLURM_NTASKS} -c ${CPUS} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 3-7:7-11:11-15:15-19:24-28:28-32:32-36:36-40 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7  --dat ./HPL.dat.v100.G8N1'
-           self.num_cpus_per_task=5
-          # self.num_gpus_per_node=4
-
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 0,3-5:7-10:12-15:17-20:24-27:28-31:32-35:36-39   --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7  --dat ./HPL.dat.v100.G8N1'
+           self.num_cpus_per_task=4
            self.extra_resources = {'memory': {'size': '450G'},'constraint': {'type': 'v100,gpu_ai'}}
            
-           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=5','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
+           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity',
+           'export IMAGE=./hpl_sing.sif',
+           'export CPUS=5',
+           'export HPL=./HPL.out', 
+           'echo hostname > HPL.out','./env.sh']
            self.tags |= {'v100_8'}
 
         elif self.variant == 'v100_4':
            self.num_tasks=4
            self.num_cpus_per_task=7
            self.num_gpus_per_node=4
-           self.extra_resources = {'memory': {'size': '340G'},'constraint': {'type': 'cpu_intel_gold_6142'}}
-           self.executable='srun -u -n ${SLURM_NTASKS} -c ${CPUS} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 3-9:9-15:16-22:22-28 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3 --dat ./HPL.dat.v100.G4N1'
-           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=7','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
+           self.extra_resources = {'memory': {'size': '340G'},'constraint': {'type': 'v100,cpu_intel_gold_6142'}}
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 0,3-5:7-10:18-21:23-26 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3 --dat ./HPL.dat.v100.G4N1'
+           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif',
+           'export CPUS=4',
+           'export HPL=./HPL.out', 
+           'echo hostname > HPL.out','./env.sh']
            self.tags |= {'v100_4'}
 
      
@@ -137,23 +139,33 @@ class hpl_gpu(hpl_test):
            self.num_tasks=8
            self.num_gpus_per_node=8
            self.extra_resources = {'memory': {'size': '850'},'constraint': {'type': 'a100,8gpus'},'nodes': {'num_of_nodes': '1'}}
-           self.executable='run -u -n ${SLURM_NTASKS} -c ${CPUS} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity +32-63:32-63:0-31:0-31:96-127:96-127:64-95:64-95 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7 --dat ./HPL.dat'
+           self.executable='run -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 30-36:45-51:0,3-7:16-22:90-96:105-111:64-70:75-81 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7 --dat ./HPL.dat'
            self.num_cpus_per_task=15
 
-           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=7','export OMPI_MCA_btl_openib_warn_no_device_params_found=0','./env.sh']
+           self.prerun_cmds = ['module purge',
+           'module load rl9-gpustack',
+           'module load singularity',
+           'export IMAGE=./hpl_sing.sif',
+           'export CPUS=7',
+           'export OMPI_MCA_btl_openib_warn_no_device_params_found=0',
+           './env.sh']
            self.tags |= {'a100_8'}
 
         elif self.variant == 'a100_4':
            self.num_tasks=4
            self.num_gpus_per_node=4
            self.extra_resources = {'memory': {'size': '450G'},'constraint': {'type': 'a100,4gpus'},'nodes': {'num_of_nodes': '1'}}
-           #self.executable='srun -u -n ${SLURM_NTASKS} -c ${CPUS} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity +32-63:32-63:0-31:0-31 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3 --dat ./HPL.dat.a100.G4N1'
-           self.executable='srun -u -n 4 -c 15 --cpu-bind=sockets,verbose singularity run --nv $IMAGE hpl.sh --cpu-cores-per-rank ${CPUS} --cpu-affinity 5-12:18-25:32-39:52-59 --gpu-affinity 2:3:0:1  --dat ./HPL.dat.a100.G4N1'
+           self.executable='srun -u -n {SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=sockets,verbose singularity run --nv $IMAGE hpl.sh --cpu-cores-per-rank ${CPUS} --cpu-affinity 0,3-7:16-22:38-44:52-59 --gpu-affinity 2:3:0:1  --dat ./HPL.dat.a100.G4N1'
            self.num_cpus_per_task=15
            self.tags |= {'a100_4'}
 
 
-           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=4','export OMPI_MCA_btl_openib_warn_no_device_params_found=0','./env.sh']
+           self.prerun_cmds = ['module purge','module load rl9-gpustack',
+           'module load singularity',
+           'export IMAGE=./hpl_sing.sif',
+           'export CPUS=7',
+           'export OMPI_MCA_btl_openib_warn_no_device_params_found=0',
+           './env.sh']
 
       @run_before('run')
       def set_job_options(self):

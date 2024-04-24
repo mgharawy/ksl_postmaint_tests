@@ -38,7 +38,7 @@ class osu_gpu_v100(osu_test):
         if self.variant == "latency":
            self.prerun_cmds = ['./env.sh']
            self.executable='nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_latency H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Latency Test v5.9', self.stdout)
            self.perf_patterns = {
                                 self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBlat>\S+)',self.stdout, 'FourGBlat', float)}
 
@@ -46,13 +46,13 @@ class osu_gpu_v100(osu_test):
         elif self.variant == "bandwidth":
            self.prerun_cmds = ['./env.sh']
            self.executable='nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_bw H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Bandwidth Test v5.9', self.stdout)
            self.perf_patterns = {self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBbw>\S+)',self.stdout, 'FourGBbw', float)}
 
         elif self.variant == "bibandwidth":
            self.prerun_cmds = ['./env.sh']
            self.executable= 'nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_bibw H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Bi-Directional Bandwidth Test v5.9', self.stdout)
            self.perf_patterns = {self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBbibw>\S+)',self.stdout, 'FourGBbibw', float)}
 
       reference = {
@@ -94,7 +94,7 @@ class osu_gpu(osu_test):
         if self.variant == "latency":
            self.prerun_cmds = ['./env.sh']
            self.executable='nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_latency H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Latency Test v5.9', self.stdout)
            self.perf_patterns = {
                                 self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBlat>\S+)',self.stdout, 'FourGBlat', float)}
 
@@ -102,13 +102,13 @@ class osu_gpu(osu_test):
         elif self.variant == "bandwidth":
            self.prerun_cmds = ['./env.sh']
            self.executable='nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_bw H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Bandwidth Test v5.9', self.stdout)
            self.perf_patterns = {self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBbw>\S+)',self.stdout, 'FourGBbw', float)}
 
         elif self.variant == "bibandwidth":
            self.prerun_cmds = ['./env.sh']
            self.executable= 'nvidia-smi --query-gpu=gpu_name,gpu_bus_id --format=csv;srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} ${OSU_DIR}/get_local_rank osu_bibw H H'
-           self.sanity_patterns = sn.assert_found(r'^# OSU MPI-CUDA ', self.stdout)
+           self.sanity_patterns = sn.assert_found(r'^# OSU MPI Bi-Directional Bandwidth Test v5.9', self.stdout)
            self.perf_patterns = {self.variant: sn.extractsingle(r'^4194304\s+(?P<FourGBbibw>\S+)',self.stdout, 'FourGBbibw', float)}
 
       reference = {

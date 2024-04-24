@@ -67,7 +67,7 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.num_cpus_per_task=46
            self.prerun_cmds = ['./env.sh']
            self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores    all_reduce_perf -b 8 -e 256M -f 2 -g 8 -c 1 -n 50 -w 20'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','export UCX_TLS=tcp','hostname','module list']
+           self.prerun_cmds = ['export NCCL_DEBUG=INFO','hostname','module list']
         elif self.variant == 'a100_4_singlenode':
            self.time_limit = '30m'
            self.num_tasks=1

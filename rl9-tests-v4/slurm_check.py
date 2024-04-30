@@ -15,7 +15,7 @@ class slurm_check(rfm.RunOnlyRegressionTest):
         self.time_limit = '3m'
         if self.variant == "slurmctld":
             self.executable='scontrol ping'
-            self.sanity_patterns =sn.assert_found(r'slurm-02 is UP',self.stdout)
+            self.sanity_patterns =sn.assert_found(r'slurm-01 is UP',self.stdout)
         elif self.variant == "squeue":
             self.executable='squeue -u ismailiy'	
             self.sanity_patterns =sn.assert_found(r'NODELIST',self.stdout)

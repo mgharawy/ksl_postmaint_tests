@@ -112,7 +112,7 @@ class hpl_gpu(hpl_test):
         elif self.variant == 'v100_8': 
            self.num_tasks=8
            self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 0,3-5:7-10:12-15:17-20:24-27:28-31:32-35:36-39   --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7  --dat ./HPL.dat.v100.G8N1'
-           self.num_cpus_per_task=4
+           self.num_cpus_per_task=5
            self.extra_resources = {'memory': {'size': '450G'},'constraint': {'type': 'v100,gpu_ai'}}
            
            self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity',

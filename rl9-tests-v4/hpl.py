@@ -89,7 +89,7 @@ class hpl_gpu(hpl_test):
                                'v100_8' : (35600,-0.05,None,'Gflops'),
                                'v100_4' : (16500,-0.05,None,'Gflops'),
                                'a100_4' : (56000,-0.05,None,'Gflops'),
-                               'a100_8' : (13500,-0.05,None,'Gflops'),
+                               'a100_8' : (92500,-0.05,None,'Gflops'),
 
 
 
@@ -138,8 +138,8 @@ class hpl_gpu(hpl_test):
         elif self.variant == 'a100_8':
            self.num_tasks=8
            self.num_gpus_per_node=8
-           self.extra_resources = {'memory': {'size': '850'},'constraint': {'type': 'a100,8gpus'},'nodes': {'num_of_nodes': '1'}}
-           self.executable='run -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 30-36:45-51:0,3-7:16-22:90-96:105-111:64-70:75-81 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7 --dat ./HPL.dat'
+           self.extra_resources = {'memory': {'size': '850G'},'constraint': {'type': 'a100,8gpus'},'nodes': {'num_of_nodes': '1'}}
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 30-36:45-51:0,3-7:16-22:90-96:105-111:64-70:75-81 --cpu-cores-per-rank ${CPUS} --gpu-affinity 0:1:2:3:4:5:6:7 --dat ./HPL.dat.a100.G8N1'
            self.num_cpus_per_task=15
 
            self.prerun_cmds = ['module purge',

@@ -48,7 +48,7 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.num_tasks=1
            self.extra_resources = {'memory': {'size': '700G'}}
            self.prerun_cmds = ['./env.sh']
-           self.executable='all_reduce_perf -g 8 -o all -c 1 -f 2 -d all'
+           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20 '
            self.num_cpus_per_task=46
            self.num_gpus_per_node=8
            self.extra_resources = {'constraint': {'type': 'v100'}}
@@ -56,7 +56,7 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.time_limit = '30m'
            self.num_tasks=1
            self.prerun_cmds = ['./env.sh']
-           self.executable='all_reduce_perf -g 8 -o all -c 1 -f 2 -d all'
+           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20'
            self.num_cpus_per_task=46
            self.num_gpus_per_node=8
            self.extra_resources = {'constraint': {'type': 'a100'}}
@@ -66,12 +66,12 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.extra_resources = {'constraint': {'type': 'v100'}}
            self.num_cpus_per_task=46
            self.prerun_cmds = ['./env.sh']
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores    all_reduce_perf -b 8 -e 256M -f 2 -g 8 -c 1 -n 50 -w 20'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','export UCX_TLS=tcp','hostname','module list']
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20'
+           self.prerun_cmds = ['export NCCL_DEBUG=INFO','hostname','module list']
         elif self.variant == 'a100_4_singlenode':
            self.time_limit = '30m'
            self.num_tasks=1
-           self.executable='all_reduce_perf -g 4 -o all -c 1 -f 2 -d all'
+           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 4 -c 1 -n 50 -w 20'
            self.num_cpus_per_task=32
            self.num_gpus_per_node=4
            self.prerun_cmds = ['./env.sh']
@@ -81,16 +81,18 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.time_limit = '2h'
            self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
            self.num_cpus_per_task=15
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=map_cpu:32,47,5,20 all_reduce_perf -b 4G -e 4G  -g 1  -n 100 -w 50 -f 2 -p 0 -z 0 -c 1'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','export NCCL_IB_HCA=mlx5_0:1,mlx5_1:1','export NCCL_ALGO=Tree','export NCCL_NET_GDR_LEVEL=5','hostname','module list','./env']
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:32*15,47*15,0*15,15*15 all_reduce_perf -b 16G -e 32G -f 2 -g 1 -c 1 -n 50 -w 20'
+           self.prerun_cmds = ['export NCCL_DEBUG=INFO',
+                               'export NCCL_ALGO=Tree',
+                               'export NCCL_NET_GDR_LEVEL=5'
+                               'hostname','module list']
         elif self.variant == 'a100_8_multinode':
-
            self.num_tasks=16
            self.time_limit = '2h'
            self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
            self.num_cpus_per_task=15
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores    all_reduce_perf -b 4G -e 4G  -g 1  -n 100 -w 50 -f 2 -p 0 -z 0 -c 1'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','export NCCL_ALGO=Tree','export NCCL_NET_GDR_LEVEL=5','hostname','module list','./env']
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores all_reduce_perf -b 16G -e 32G -f 2 -g 1 -c 1 -n 50 -w 20'
+           self.prerun_cmds = ['export NCCL_DEBUG=INFO','hostname','module list']
      
 
        

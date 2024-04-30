@@ -79,7 +79,7 @@ class pytorch_a100_gpu(pytorch_test):
      
 @rfm.simple_test
 class pytorch_v100_gpu(pytorch_test):
-      variant = parameter(['v100_8_singlenode' , 'v100_8_multinode'])
+      variant = parameter(['v100_8_singlenode' , 'v100_8_multinode','v100_1_multinode'])
       time_limit= '2h'
       reference = {
                         'ibex' : {
@@ -113,6 +113,10 @@ class pytorch_v100_gpu(pytorch_test):
            self.num_cpus_per_task=6
                
 
+        elif  self.variant == 'v100_1_multinode':
+           self.num_tasks= 2
+           self.num_cpus_per_task=6
+
       @run_before('run')
       def set_job_options(self):
         if self.variant== 'v100_8_singlenode':
@@ -124,5 +128,10 @@ class pytorch_v100_gpu(pytorch_test):
         elif self.variant == 'v100_8_multinode':
            self.job.options = ['--gpus=16',
                               '--gpus-per-node=4',
+                             # '--account=ibex-cs'
+                             ]
+        elif self.variant == 'v100_1_multinode':
+           self.job.options = ['--gpus=2',
+                              '--gpus-per-node=1',
                              # '--account=ibex-cs'
                              ]

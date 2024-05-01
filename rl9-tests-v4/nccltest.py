@@ -21,13 +21,11 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
                         'ibex' : {
                                 'v100_8_singlenode' : (100,-0.1,None,'GB/s'),
                                 'v100_4_singlenode' : (100,-0.1,None,'GB/s'),
-                                'a100_4_singlenode' :(150,-0.1,None,'GB/s'),
-                                'a100_8_singlenode':(150,-0.1,None,'GB/s'),
-                                'v100_8_multinode' : (13,-0.1,None,'GB/s'),
+                                'a100_4_singlenode' :(230,-0.1,None,'GB/s'),
+                                'a100_8_singlenode':(230,-0.1,None,'GB/s'),
+                                'v100_8_multinode' : (100,-0.1,None,'GB/s'),
                                 'a100_4_multinode' : (40,-0.1,None,'GB/s'),
-                                'a100_8_multinode' : (100,-0.1,None,'GB/s')
-
-
+                                'a100_8_multinode' : (100.0,-0.1,None,'GB/s')
                         }
                 }
       
@@ -36,72 +34,77 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
       def setting_variables(self):
         if self.variant == 'v100_4_singlenode': 
            self.time_limit = '30m'
-           self.num_tasks=1
-           self.prerun_cmds = ['./env.sh']
-           self.extra_resources = {'memory': {'size': '700G'}}          
-           self.executable='all_reduce_perf -g 4 -o all -c 1 -f 2 -d all'
-           self.num_cpus_per_task=30
+           self.num_tasks=4
+           self.num_cpus_per_task=7
            self.num_gpus_per_node=4
-           self.extra_resources = {'constraint': {'type': 'gpu_v100'}}
+           self.prerun_cmds = ['./env.sh']
+           self.extra_resources = {'memory': {'size': '300G'}}          
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
+           self.extra_resources = {'constraint': {'type': 'v100,cpu_intel_gold_6142'}}
         elif self.variant == 'v100_8_singlenode':
            self.time_limit = '30m'
-           self.num_tasks=1
+           self.num_tasks=8
+           self.num_cpus_per_task=5
+           self.num_gpus_per_node=8
            self.extra_resources = {'memory': {'size': '700G'}}
            self.prerun_cmds = ['./env.sh']
-           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20 '
-           self.num_cpus_per_task=46
-           self.num_gpus_per_node=8
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20 '
            self.extra_resources = {'constraint': {'type': 'v100'}}
         elif self.variant == 'a100_8_singlenode':
            self.time_limit = '30m'
-           self.num_tasks=1
-           self.prerun_cmds = ['./env.sh']
-           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20'
-           self.num_cpus_per_task=46
+           self.num_tasks=8
+           self.num_cpus_per_task=15
            self.num_gpus_per_node=8
+           self.prerun_cmds = ['./env.sh']
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
            self.extra_resources = {'constraint': {'type': 'a100'}}
         elif self.variant == 'v100_8_multinode':
-           self.num_tasks=2
-           self.time_limit = '2h'
-           self.extra_resources = {'constraint': {'type': 'v100'}}
-           self.num_cpus_per_task=46
-           self.prerun_cmds = ['./env.sh']
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores all_reduce_perf -b 16G -e 32G -f 2 -g 8 -c 1 -n 50 -w 20'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','hostname','module list']
+           self.num_tasks=16
+           self.time_limit = '30m'
+           self.extra_resources = {'constraint': {'type': 'v100,gpu_ai'}}
+           self.num_cpus_per_task = 5
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:0,6,11,19,24,29,33,38 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
+           self.prerun_cmds = ['./env.sh',
+                               'export NCCL_DEBUG=INFO',
+                               'hostname','module list',
+                               'export NCCL_ALGO=Tree',
+                               'export NCCL_NET_GDR_LEVEL=4',
+                               'export NCCL_IB_HCA=mlx5',
+                               'hostname','module list']
         elif self.variant == 'a100_4_singlenode':
            self.time_limit = '30m'
-           self.num_tasks=1
-           self.executable='all_reduce_perf -b 16G -e 32G -f 2 -g 4 -c 1 -n 50 -w 20'
-           self.num_cpus_per_task=32
+           self.num_tasks=4
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
+           self.num_cpus_per_task=15
            self.num_gpus_per_node=4
            self.prerun_cmds = ['./env.sh']
-           self.extra_resources = {'constraint': {'type': 'gpu_a100'}}
-        elif  self.variant == 'a100_4_multinode':
-           self.num_tasks=8
-           self.time_limit = '2h'
            self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
-           self.num_cpus_per_task=15
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:32*15,47*15,0*15,15*15 all_reduce_perf -b 16G -e 32G -f 2 -g 1 -c 1 -n 50 -w 20'
+        elif  self.variant == 'a100_4_multinode':
+           self.num_tasks=2
+           self.num_cpus_per_task=62
+           self.time_limit = '30m'
+           self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:35,45,4,25 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
            self.prerun_cmds = ['export NCCL_DEBUG=INFO',
+                               'hostname','module list',
                                'export NCCL_ALGO=Tree',
-                               'export NCCL_NET_GDR_LEVEL=5'
+                               'export NCCL_NET_GDR_LEVEL=4',
+                               'export NCCL_IB_HCA=mlx5',
                                'hostname','module list']
+
         elif self.variant == 'a100_8_multinode':
            self.num_tasks=16
-           self.time_limit = '2h'
-           self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
            self.num_cpus_per_task=15
-           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} --cpu-bind=cores all_reduce_perf -b 16G -e 32G -f 2 -g 1 -c 1 -n 50 -w 20'
-           self.prerun_cmds = ['export NCCL_DEBUG=INFO','hostname','module list']
-     
-
-       
-
+           self.time_limit = '30m'
+           self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
+           self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:35,45,4,25,105,115,75,85 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
+           self.prerun_cmds = ['export NCCL_DEBUG=INFO',
+                               'hostname','module list',
+                               'export NCCL_ALGO=Tree',
+                               'export NCCL_NET_GDR_LEVEL=4',
+                               'export NCCL_IB_HCA=mlx5',
+                               'hostname','module list']
         self.tags = {'gpu',self.variant,'acceptance','nccl'}
-
-                
-    
-
 
       @run_before('run')
       def set_job_options(self):

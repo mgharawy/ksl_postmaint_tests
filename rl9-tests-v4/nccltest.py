@@ -66,11 +66,10 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:0,6,11,19,24,29,33,38 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
            self.prerun_cmds = ['./env.sh',
                                'export NCCL_DEBUG=INFO',
-                               'hostname','module list',
                                'export NCCL_ALGO=Tree',
                                'export NCCL_NET_GDR_LEVEL=4',
                                'export NCCL_IB_HCA=mlx5',
-                               'hostname','module list']
+                               'echo ${SLURM_NODELIST}','module list']
         elif self.variant == 'a100_4_singlenode':
            self.time_limit = '30m'
            self.num_tasks=4
@@ -80,17 +79,17 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.prerun_cmds = ['./env.sh']
            self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
         elif  self.variant == 'a100_4_multinode':
-           self.num_tasks=2
-           self.num_cpus_per_task=62
+           self.num_tasks=8
+           self.num_cpus_per_task=15
            self.time_limit = '30m'
            self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
            self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:35,45,4,25 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
            self.prerun_cmds = ['export NCCL_DEBUG=INFO',
-                               'hostname','module list',
+                               'echo ${SLURM_NODELIST}','module list',
                                'export NCCL_ALGO=Tree',
                                'export NCCL_NET_GDR_LEVEL=4',
-                               'export NCCL_IB_HCA=mlx5',
-                               'hostname','module list']
+                               'export NCCL_IB_HCA=mlx5'
+                               ]
 
         elif self.variant == 'a100_8_multinode':
            self.num_tasks=16
@@ -99,11 +98,10 @@ class nccl_tests(rfm.RunOnlyRegressionTest):
            self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
            self.executable='srun -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=map_cpu:35,45,4,25,105,115,75,85 all_reduce_perf -b 4G -e 4G -f 2 -g 1 -c 0 -n 50 -w 20'
            self.prerun_cmds = ['export NCCL_DEBUG=INFO',
-                               'hostname','module list',
                                'export NCCL_ALGO=Tree',
                                'export NCCL_NET_GDR_LEVEL=4',
                                'export NCCL_IB_HCA=mlx5',
-                               'hostname','module list']
+                               'echo ${SLURM_NODELIST}','module list']
         self.tags = {'gpu',self.variant,'acceptance','nccl'}
 
       @run_before('run')

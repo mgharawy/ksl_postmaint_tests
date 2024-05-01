@@ -27,9 +27,9 @@ class pytorch_a100_gpu(pytorch_test):
       time_limit = "3h"  
       reference = {
                         'ibex' : {
-                                'a100_8_singlenode' : (1100,None,+10,None),
-                                'a100_4_singlenode' : (2200,None,+10,None),
-                                'a100_8_4GPUS_singlenode' : (2100,None,+10,None)
+                                'a100_8_singlenode' : (1100.00,None,+0.1,None),
+                                'a100_4_singlenode' : (2200.00,None,+0.1,None),
+                                'a100_8_4GPUS_singlenode' : (2100.00,None,+0.1,None)
                                
                         }
                 }
@@ -39,12 +39,14 @@ class pytorch_a100_gpu(pytorch_test):
           self.tags |= {'a100' , self.variant}
           self.prerun_cmds= ['module purge','module load rl9-gpustack','module use  /sw/rl9g/dl/modulefiles ',
                              'module load  horovod/0.28.0',
-                             'export OMPI_MCA_btl_openib_warn_no_device_params_found=0',
-                             'export UCX_MEMTYPE_CACHE=n','export UCX_TLS=tcp',
-                             'export DATA_DIR="/ibex/ai/reference/CV/ILSVR/classification-localization/data/jpeg/"',
-                             'export main_exe="./train_resnet50.py"','batch_size=256',
-                             'epochs=5', 'export workers=${SLURM_CPUS_PER_TASK}','module list',
-                             'export cmd="python3 ${main_exe} --epochs ${epochs} --batch-size ${batch_size} --num_workers=$workers --root-dir=${DATA_DIR} --train-dir ${DATA_DIR}/train --val-dir ${DATA_DIR}/val ${NODE_LOCAL_STORAGE}"']
+                              'export NCCL_DEBUG=INFO',
+                              'export NCCL_ALGO=Tree',
+                              'export NCCL_NET_GDR_LEVEL=4',
+                              'export NCCL_IB_HCA=mlx5',
+                              'export DATA_DIR="/ibex/ai/reference/CV/ILSVR/classification-localization/data/jpeg/"',
+                              'export main_exe="./train_resnet50.py"','batch_size=256',
+                              'epochs=5', 'export workers=${SLURM_CPUS_PER_TASK}','module list',
+                              'export cmd="python3 ${main_exe} --epochs ${epochs} --batch-size ${batch_size} --num_workers=$workers --root-dir=${DATA_DIR} --train-dir ${DATA_DIR}/train --val-dir ${DATA_DIR}/val ${NODE_LOCAL_STORAGE}"']
           
           self.executable= 'time -p srun -u -n ${SLURM_NTASKS} -N ${SLURM_NNODES} -c ${SLURM_CPUS_PER_TASK} ${cmd} --log-dir=log.${SLURM_JOBID} --warmup-epochs=0.0'
           
@@ -94,8 +96,10 @@ class pytorch_v100_gpu(pytorch_test):
         self.extra_resources = {'constraint': {'type': 'v100,gpu_ai'},'memory': {'size': '700G'}}
         self.prerun_cmds= ['module purge','module load rl9-gpustack','module use  /sw/rl9g/dl/modulefiles ',
                              'module load  horovod/0.28.0',
-                             'export OMPI_MCA_btl_openib_warn_no_device_params_found=0',
-                             'export UCX_MEMTYPE_CACHE=n','export UCX_TLS=tcp',
+                              'export NCCL_DEBUG=INFO',
+                              'export NCCL_ALGO=Tree',
+                              'export NCCL_NET_GDR_LEVEL=4',
+                              'export NCCL_IB_HCA=mlx5',
                              'export DATA_DIR="/ibex/ai/reference/CV/ILSVR/classification-localization/data/jpeg/"',
                              'export main_exe="./train_resnet50.py"','batch_size=256',
                              'epochs=5', 'export workers=${SLURM_CPUS_PER_TASK}','module list',

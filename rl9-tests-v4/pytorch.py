@@ -29,7 +29,8 @@ class pytorch_a100_gpu(pytorch_test):
                         'ibex' : {
                                 'a100_8_singlenode' : (1100.00,None,+0.1,None),
                                 'a100_4_singlenode' : (2200.00,None,+0.1,None),
-                                'a100_8_4GPUS_singlenode' : (2100.00,None,+0.1,None)
+                                'a100_8_4GPUS_singlenode' : (2100.00,None,+0.1,None),
+                                'a100_8_multinode'  : (1100,None,+10,None)
                                
                         }
                 }
@@ -65,6 +66,11 @@ class pytorch_a100_gpu(pytorch_test):
              self.num_cpus_per_task=5
              self.extra_resources = {'constraint': {'type': 'a100,8gpus'},'memory': {'size': '400G'}}
              #self.num_gpus_per_node=8
+          elif self.variant == 'a100_8_multinode':
+             self.num_tasks= 16
+             self.num_cpus_per_task=5
+             self.extra_resources = {'constraint': {'type': 'a100,8gpus'},'memory': {'size': '400G'}}
+             #self.num_gpus_per_node=8
       
       
       @run_before('run')
@@ -74,6 +80,10 @@ class pytorch_a100_gpu(pytorch_test):
                               '--gpus-per-node=4',
                               '--gpus-per-socket=4',
                               '--sockets-per-node=1'
+                              ]
+        elif self.variant == 'a100_8_multinode':
+          self.job.options = ['--gpus=16',
+                              '--gpus-per-node=4',
                               ]
 
   

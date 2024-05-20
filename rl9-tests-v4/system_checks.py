@@ -3,7 +3,7 @@ import reframe as rfm
 import reframe.utility.sanity as sn
 import os
 class system_check(rfm.RunOnlyRegressionTest):
-      variant= parameter(['homefs','scartchfs','aifs','userfs','projectfs','localfs','lustrefs','lustrefs2','modulepath','numanodes','ibvdev','os','kernal'])
+      variant= parameter(['homefs','scartchfs','aifs','userfs','projectfs','localfs','lustrefs','lustrefs2','modulepath','numanodes','ibvdev','os','kernel'])
       maintainers = ['rana.selim@kaust.edu.sa']
       descr = 'System sanity check on ibex nodes'
       tags = {'fs','acceptance'}
@@ -53,7 +53,7 @@ class system_cpu(system_check):
        elif  self.variant == "os":
          self.executable='cat /etc/redhat-release'
          self.sanity_patterns =sn.assert_found(r'Rocky Linux release 9.1',self.stdout)
-       elif  self.variant == "kernal":
+       elif  self.variant == "kernel":
          self.executable='uname -r '
          self.sanity_patterns =sn.assert_found(r'5.14.0-162.23.1.el9_1.x86_64',self.stdout)
 
@@ -61,7 +61,7 @@ class system_cpu(system_check):
 
 @rfm.simple_test
 class system_gpu(system_check):
-      variant= parameter(['homefs','scartchfs','aifs','userfs','projectfs','localfs','lustrefs','lustrefs2','modulepath','numanodes','ibvdev','nvidiasmi','devicequery','os','kernal'])
+      variant= parameter(['homefs','scartchfs','aifs','userfs','projectfs','localfs','lustrefs','lustrefs2','modulepath','numanodes','ibvdev','nvidiasmi','devicequery','os','kernel','peermemserivce','modpeermem','modgdrdrv'])
 
       descr = 'System sanity check on gpu nodes'
       valid_systems = ['ibex:gpu','ibex:gpu24','ibex:gpu_wide24']
@@ -110,9 +110,18 @@ class system_gpu(system_check):
        elif  self.variant == "os":
          self.executable='cat /etc/redhat-release'
          self.sanity_patterns =sn.assert_found(r'Rocky Linux release 9.1',self.stdout)
-       elif  self.variant == "kernal":
+       elif  self.variant == "kernel":
          self.executable='uname -r '
          self.sanity_patterns =sn.assert_found(r'5.14.0-162.23.1.el9_1.x86_64',self.stdout)
+       elif  self.variant == "peermemserivce":
+         self.executable='systemctl status nv_peer_mem'
+         self.sanity_patterns =sn.assert_found(r'loaded (/etc/rc.d/init.d/nv_peer_mem; generated)',self.stdout)
+       elif  self.variant == "modpeermem":
+         self.executable='lsmod | grep -o nv_peer_mem'
+         self.sanity_patterns =sn.assert_found(r'nv_peer_mem',self.stdout)
+       elif  self.variant == "modgdrdrv":
+         self.executable='lsmod | grep -o gdrdrv'
+         self.sanity_patterns =sn.assert_found(r'gdrdrv',self.stdout)
 
 
       @run_before('run')

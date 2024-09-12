@@ -32,6 +32,7 @@ class osu_gpu_v100(osu_test):
                               '--gpus-per-node=1']
       @run_after('init')
       def setting_parameters(self):
+        self.tags |= {self.variant}
         if 'v100' in self.params:
             self.tags |= {'v100'}
 
@@ -84,6 +85,7 @@ class osu_gpu(osu_test):
                               '--gpus-per-node=1']
       @run_after('init')
       def setting_parameters(self):
+        self.tags |= {self.variant}
         if 'p100' in self.params:
             self.tags |= {'p100'}
         if 'rtx2080ti' in self.params:
@@ -130,6 +132,7 @@ class osu_cpu(osu_test):
       tags = {'cpu','osu','acceptance'}
       @run_after('init')
       def setting_parameters(self):
+        self.tags |= {self.variant}
         if self.variant == "latency":
            self.prerun_cmds = ['./env.sh']
            self.executable='osu_latency'

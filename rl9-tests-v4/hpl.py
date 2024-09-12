@@ -155,7 +155,7 @@ class hpl_gpu(hpl_test):
            self.num_tasks=4
            self.num_gpus_per_node=4
            self.extra_resources = {'memory': {'size': '450G'},'constraint': {'type': 'a100,4gpus'},'nodes': {'num_of_nodes': '1'}}
-           self.executable='srun -u -n {SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=sockets,verbose singularity run --nv $IMAGE hpl.sh --cpu-cores-per-rank ${CPUS} --cpu-affinity 0,3-7:16-22:38-44:52-59 --gpu-affinity 2:3:0:1  --dat ./HPL.dat.a100.G4N1'
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=sockets,verbose singularity run --nv $IMAGE hpl.sh --cpu-cores-per-rank ${CPUS} --cpu-affinity 0,3-7:16-22:38-44:52-59 --gpu-affinity 2:3:0:1  --dat ./HPL.dat.a100.G4N1'
            self.num_cpus_per_task=15
            self.tags |= {'a100_4'}
 

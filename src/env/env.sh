@@ -24,28 +24,28 @@ free -m
 echo "Mellanox OFED"
 ofed_info -n
 
-echo " IB adapters and firmware:"
+echo "IB adapters and firmware:"
 ibstat
 
-echo " Local storage:"
+echo "Local storage:"
 lsblk
 df -h
 
-echo " GPFS:"
+echo "GPFS:"
 rpm -q gpfs.base
 
 echo " Lustre:"
 cat /sys/fs/lustre/version
 echo "Weka"
 weka version
-echo" BeeGFS:"
+echo "BeeGFS:"
 beegfs-ctl | grep -i version
 
 if [[  $HOST == *gpu* ]]
  then
-     echo" NVIDIA driver/kernel module:"
+     echo "NVIDIA driver/kernel module:"
      nvidia-smi
-     echo" CUDA version"
+     echo "CUDA version"
      echo $CUDA_VERSION
 fi
 echo "Job status:"

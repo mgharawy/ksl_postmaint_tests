@@ -3,8 +3,8 @@ import reframe as rfm
 import reframe.utility.sanity as sn
 
 class hpl_test(rfm.RunOnlyRegressionTest):
-      maintainers = ['rana.selim@kaust.edu.sa']
-      descr = 'running hpl tests for v100 and a100'
+      maintainers = ['mohamed.elgharawy@kaust.edu.sa']
+      descr = 'running hpl tests for cpu/gpu'
     #  tags = {'hpl','gpu','acceptance'}
     #  sourcesdir= '../src/hpl/'
       path='HPL.out'
@@ -73,8 +73,8 @@ class hpl_cpu(hpl_test):
      
 @rfm.simple_test
 class hpl_gpu(hpl_test):
-      variant = parameter(['p100','v100_4','v100_8','a100_4','a100_8'])
-      valid_systems = ['ibex:gpu']
+      variant = parameter(['p100','v100_4','v100_8','a100_4','a100_8','rtx4090_singlegpu'])
+      valid_systems = ['ibex:batch']
       valid_prog_environs = ['gpustack_builtin']
       tags= { 'hpl','gpu'}
       sourcesdir= '../src/hpl/gpu'
@@ -90,6 +90,7 @@ class hpl_gpu(hpl_test):
                                'v100_4' : (16500,-0.05,None,'Gflops'),
                                'a100_4' : (56000,-0.05,None,'Gflops'),
                                'a100_8' : (92500,-0.05,None,'Gflops'),
+                               'rtx4090_singlegpu' : (1220,-0.05,None,'Gflops')
 
 
 
@@ -108,6 +109,16 @@ class hpl_gpu(hpl_test):
 
            self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=6','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
            self.tags |= {'p100'}
+
+        elif  self.variant == 'rtx4090_singlegpu':
+           self.num_tasks=1
+           self.executable='srun -u -n ${SLURM_NTASKS} -c ${SLURM_CPUS_PER_TASK} --cpu-bind=none singularity run --nv $IMAGE hpl.sh --cpu-affinity 0,3-7  --cpu-cores-per-rank ${CPUS} --gpu-affinity 0 --dat ./HPL.dat.4090'
+           self.num_cpus_per_task=8
+           self.num_gpus_per_node=1
+           self.extra_resources = {'memory': {'size': '220G'},'constraint': {'type': 'gpu_rtx4090'}}
+
+           self.prerun_cmds = ['module purge','module load rl9-gpustack','module load singularity','export IMAGE=./hpl_sing.sif','export CPUS=6','export HPL=./HPL.out', 'echo hostname > HPL.out','./env.sh']
+           self.tags |= {'rtx4090'}
 
         elif self.variant == 'v100_8': 
            self.num_tasks=8

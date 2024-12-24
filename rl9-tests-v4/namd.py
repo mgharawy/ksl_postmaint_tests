@@ -4,7 +4,7 @@ import reframe.utility.sanity as sn
 
 @rfm.simple_test
 class namd_check(rfm.RunOnlyRegressionTest):
-      variant= parameter(['v100_8', 'a100_8'])
+      variant= parameter(['v100_8', 'a100_8', 'rtx4090_singlegpu'])
 
       @run_after('init')
       def setting_variables(self):
@@ -24,8 +24,10 @@ class namd_check(rfm.RunOnlyRegressionTest):
         #['export SLURM_CPU_BIND_TYPE=sockets','export SLURM_CPU_BIND_VERBOSE=verbose']
  
         self.executable='namd2'
-        self.executable_opts = '+p8 +devices 0,1,2,3,4,5,6,7 +idlepoll  apoa1.namd'.split()
-        
+        if self.variant == 'rtx4090_singlegpu':
+            self.executable_opts = '+p1 +devices 0 +idlepoll  apoa1.namd'.split()
+        else:
+            self.executable_opts = '+p8 +devices 0,1,2,3,4,5,6,7 +idlepoll  apoa1.namd'.split() 
         
         # Job script attributes
 
@@ -39,17 +41,28 @@ class namd_check(rfm.RunOnlyRegressionTest):
         elif self.variant == 'a100_8' :
            self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
            self.tags = { 'a100'}
+        elif self.variant == 'rtx4090_singlegpu' :
+           self.extra_resources = {'constraint': {'type': 'gpu_rtx4090'}}
+           self.num_gpus_per_node=1
+           self.num_cpus_per_task=1
+           self.tags = { 'rtx4090'}
         self.sanity_patterns = sn.assert_eq(sn.count(sn.extractall(r'TIMING: (?P<step_num>\S+)  CPU:', self.stdout, 'step_num')),25)
-        
+     
         self.perf_patterns = {       
                     'days_ns': sn.avg(sn.extractall('Info: Benchmark time: \S+ CPUs \S+ ''s/step (?P<days_ns>\S+) days/ns \S+ MB memory', self.stdout, 'days_ns', float))
                                }
         
-  
-        self.reference = {
-                            'ibex' : {      'days_ns': (0.037, None, 0.1,'days_ns')
-                                            },
-                            }
+        if self.variant == 'rtx4090_singlegpu' :
+            self.reference = {
+                                'ibex' : {      'days_ns': (0.1, None, 0.1,'days_ns'),
+                                                },
+                                }
+        else:
+            self.reference = {
+                                'ibex' : {      'days_ns': (0.037, None, 0.1,'days_ns'),
+                                                },
+                                }
+
         
         self.tags = {'namd','gpu',self.variant,'acceptance'}
 

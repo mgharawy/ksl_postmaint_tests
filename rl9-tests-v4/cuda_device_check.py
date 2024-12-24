@@ -4,12 +4,13 @@ import reframe.utility.sanity as sn
 
 @rfm.simple_test
 class Cuda_device_checks(rfm.RegressionTest):
-      variant= parameter(['v100_4','v100_8', 'p100','rtx2080ti','a100_4'])
+      variant= parameter(['v100_4','v100_8', 'p100','rtx2080ti','a100_4','rtx4090_singlegpu'])
 
       @run_after('init')
       def setting_variables(self):
         self.descr = 'CUDA Device query'
         self.constraint = self.variant
+        self.tags = {'gpu',self.variant,'acceptance','device_query','cuda'}
         # Environment settings
         self.valid_systems = ['ibex:batch']
         self.valid_prog_environs = ['gpustack_cuda']
@@ -17,6 +18,8 @@ class Cuda_device_checks(rfm.RegressionTest):
         self.time_limit = '10m'
         if self.variant == 'v100_8' or self.variant == 'rtx2080ti' :
            self.num_gpus_per_node=8
+        elif self.variant == 'rtx4090_singlegpu' :
+           self.num_gpus_per_node=1
         else:
            self.num_gpus_per_node=4
 
@@ -39,6 +42,9 @@ class Cuda_device_checks(rfm.RegressionTest):
            self.extra_resources = {'constraint': {'type': 'rtx2080ti'}}
         elif self.variant == 'a100':
            self.extra_resources = {'constraint': {'type': '4gpus,a100'}}
+        elif self.variant == 'rtx4090_singlegpu':
+           self.extra_resources = {'constraint': {'type': 'gpu_rtx4090'}}
+           self.tags.add('rtx4090')
 
 
 
@@ -55,11 +61,11 @@ class Cuda_device_checks(rfm.RegressionTest):
                                             'v100_4': (4,None,None,'devices'),
                                             'v100_8': (8,None,None,'devices'),
                                             'rtx2080ti': (8,None,None,'devices'),
+                                            'rtx4090_singlegpu': (1,None,None,'devices'),
                                             'a100_4': (4,None,None,'devices')
 
                                             },
                             }
-        self.tags = {'gpu',self.variant,'acceptance','device_query','cuda'}
 
         self.maintainers = ['mohsin.shaikh@kaust.edu.sa']
         

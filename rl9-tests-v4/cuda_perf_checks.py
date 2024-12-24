@@ -4,12 +4,13 @@ import reframe.utility.sanity as sn
 
 @rfm.simple_test
 class Cuda_perf_checks(rfm.RegressionTest):
-      variant= parameter(['v100_4','v100_8', 'p100','rtx2080ti','a100_4','a100_8'])
+      variant= parameter(['v100_4','v100_8', 'p100','rtx2080ti','rtx4090_singlegpu','a100_4','a100_8'])
 
       @run_after('init')
       def setting_variables(self):
         self.descr = 'CUDA Perf test'
         self.constraint = self.variant
+        self.tags = {'gpu',self.variant,'acceptance','cuda','perf_checks'}
         # Environment settings
         self.valid_systems = ['ibex:batch']
         self.valid_prog_environs = ['gpustack_cuda']
@@ -42,6 +43,9 @@ class Cuda_perf_checks(rfm.RegressionTest):
            self.extra_resources = {'constraint': {'type': 'a100,4gpus'}}
         elif self.variant == 'a100_8':
            self.extra_resources = {'constraint': {'type': 'a100,8gpus'}}
+        elif self.variant == 'rtx4090_singlegpu':
+           self.extra_resources = {'constraint': {'type': 'gpu_rtx4090'}}
+           self.tags.add('rtx4090')
 
 
 
@@ -57,11 +61,11 @@ class Cuda_perf_checks(rfm.RegressionTest):
                                             'v100_4': (53,-0.1,None,'Gflops'),
                                             'v100_8': (53,-0.1,None,'Gflops'),
                                             'rtx2080ti': (6.6,-0.1,None,'Gflops'),
+                                            'rtx4090_singlegpu': (43,-0.1,None,'Gflops'),
                                             'a100_4': (38,-0.1,None,'Gflops'),
                                             'a100_8': (38,-0.1,None,'Gflops')
     },
                             }
-        self.tags = {'gpu',self.variant,'acceptance','cuda','perf_checks'}
 
         self.maintainers = ['mohsin.shaikh@kaust.edu.sa']
        

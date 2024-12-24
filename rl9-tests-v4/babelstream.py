@@ -5,11 +5,11 @@ import reframe.utility.sanity as sn
 @rfm.simple_test
 class babelstream_tests(rfm.RunOnlyRegressionTest):
 
-      variant= parameter(['a100_4_singlenode'])
+      variant= parameter(['a100_4_singlenode','rtx4090_singlegpu'])
 
 
            ## TEST BASIC INFO
-      maintainers = ['rana.selim@kaust.edu.sa']
+      maintainers = ['mohamed.elgharawy@kaust.edu.sa']
       descr = 'running babelstream tests on gpu nodes '
            ## SETTING TEST ENV
       sourcesdir= None
@@ -18,7 +18,8 @@ class babelstream_tests(rfm.RunOnlyRegressionTest):
       modules = ['gcc/12.2.0','cuda/11.8']
       reference = {
                         'ibex' : {
-                               'a100_4_singlenode' : (7100000,-0.05,None,'MB/s')
+                               'a100_4_singlenode' : (7100000,-0.05,None,'MB/s'),
+                               'rtx4090_singlegpu': (3300000,-0.05,None,'MB/s')
 
                         }
                 }
@@ -36,9 +37,16 @@ class babelstream_tests(rfm.RunOnlyRegressionTest):
 
 
         if self.variant == 'a100_4_singlenode': 
-#           self.extra_resources ={'memory': {'size': '400G'},'constraint': {'type': 'a100'},'nodes': {'num_of_nodes': '1'}} 
+           self.extra_resources ={'memory': {'size': '400G'},'constraint': {'type': 'a100'},'nodes': {'num_of_nodes': '1'}} 
            self.num_gpus_per_node=4
            self.num_cpus_per_task=56
+           self.executable='srun ./run_script_ksl_cs_storm.sh'
+        elif self.variant == 'rtx4090_singlegpu':
+           self.extra_resources = {'memory': {'size': '220G'},'constraint': {'type': 'gpu_rtx4090'}}
+           self.num_gpus_per_node=1
+           self.num_cpus_per_task=26
+           self.executable='srun ./run_script_ksl_cs_storm_4090.sh'
+           self.tags.add('rtx4090')
 
     
 
@@ -53,5 +61,4 @@ class babelstream_tests(rfm.RunOnlyRegressionTest):
  
       @run_before('performance')
       def set_perf_patterns(self):
-          self.perf_patterns = {'Traid' : sn.extractsingle(r'^[T]\w+[(]\w+[)]\s(?P<Traid>\d*\.\d+)', self.stdout, 'MB/s' , float)}
-
+          self.perf_patterns = {self.variant : sn.extractsingle(r'Triad\(node\)\s+(?P<Triad>\d*\.\d+)', self.stdout, 'Triad' , float)}
